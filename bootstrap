@@ -1,0 +1,2 @@
+#!/bin/sh
+./pypy3-v6.0.0-linux64/bin/pypy3 runtime_interface.py ${AWS_LAMBDA_RUNTIME_API}
