@@ -17,6 +17,7 @@ class RuntimeInterface(object):
         path = "2018-06-01/runtime/invocation"
         self.fetch_url = "http://{}/{}/next".format(AWS_LAMBDA_RUNTIME_API, path)
         self.response_url = "http://{}/{}/{}/response".format(AWS_LAMBDA_RUNTIME_API, path, "{}")
+        self.error_url = "http://{}/{}/{}/error".format(AWS_LAMBDA_RUNTIME_API, path, "{}")
 
     def fetch_next_request(self):
         response = requests.get(self.fetch_url)
@@ -26,9 +27,21 @@ class RuntimeInterface(object):
         url = self.response_url.format(request_id)
         requests.post(url, data=json.dumps(response))
 
+    def post_error(self, request_id, error):
+        url = self.error_url.format(request_id)
+        print(e)
+        error_response = {
+            "errorMessage" : error.message,
+            "errorType" : type(e)
+        }
+        requests.post(url, data=json.dumps(error_response))
+
     def process_event(self):
         request_id, r = self.fetch_next_request()
-        response = handler.hello(r.json(), None)
+        try:
+            response = handler.hello(r.json(), None)
+        except Exception as e:
+            self.post_error(request_id, e)
         self.post_response(request_id, response)
 
     def run_loop(self):
