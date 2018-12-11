@@ -13,11 +13,11 @@ __status__ = "Prototype"
 
 
 class RuntimeInterface(object):
-    def __init__(self, AWS_LAMBDA_RUNTIME_API):
-        path = "2018-06-01/runtime/invocation"
-        self.fetch_url = "http://{}/{}/next".format(AWS_LAMBDA_RUNTIME_API, path)
-        self.response_url = "http://{}/{}/{}/response".format(AWS_LAMBDA_RUNTIME_API, path, "{}")
-        self.error_url = "http://{}/{}/{}/error".format(AWS_LAMBDA_RUNTIME_API, path, "{}")
+    def __init__(self, api):
+        url_scheme = "http://{}/2018-06-01/runtime/invocation".format(api)
+        self.fetch_url = url_scheme + "/next"
+        self.response_url = url_scheme + "/{}/response"
+        self.error_url = url_scheme + "/{}/error"
 
     def fetch_next_request(self):
         response = requests.get(self.fetch_url)
