@@ -6,20 +6,36 @@ import requests
 import handler
 
 
-def process_event(AWS_LAMBDA_RUNTIME_API):
-    global requestCount
-    requestCount += 1
-    r = requests.get("http://{}/2018-06-01/runtime/invocation/next".format(AWS_LAMBDA_RUNTIME_API))
-    request_id = r.headers["Lambda-Runtime-Aws-Request-Id"]
-    response = handler.hello(r.json(), None)
-    body = json.loads(response["body"])
-    body["debug"] = "requestCount: {}".format(requestCount)
-    response["body"] = json.dumps(body)
-    requests.post("http://{}/2018-06-01/runtime/invocation/{}/response".format(AWS_LAMBDA_RUNTIME_API, request_id), data=json.dumps(response))
+class RuntimeInterface(object):
+    def __init__(self, AWS_LAMBDA_RUNTIME_API):
+        self.requestCount = 0
+        path = "2018-06-01/runtime/invocation"
+        self.fetch_url = "http://{}/{}/next".format(AWS_LAMBDA_RUNTIME_API, path)
+        self.response_url = "http://{}/path/{}/response".format(AWS_LAMBDA_RUNTIME_API, path, "{}")
+
+    def fetch_next_request(self):
+        response = requests.get(self.fetch_url)
+        self.requestCount += 1
+        return response.headers["Lambda-Runtime-Aws-Request-Id"], response
+
+    def post_response(self, request_id, response):
+        url = self.response_url.format(request_id)
+        requests.post(url, data=json.dumps(response))
+
+    def process_event(self):
+        request_id, r = self.fetch_next_request()
+        response = handler.hello(r.json(), None)
+        body = json.loads(response["body"])
+        body["debug"] = "requestCount: {}".format(self.requestCount)
+        response["body"] = json.dumps(body)
+        self.post_response(request_id, response)
+
+    def run_loop(self):
+        while True:
+            self.process_event()
 
 
 if __name__ == "__main__":
     AWS_LAMBDA_RUNTIME_API = sys.argv[1]
-    requestCount = 0
-    while True:
-        process_event(AWS_LAMBDA_RUNTIME_API)
+    runtime = RuntimeInterface(AWS_LAMBDA_RUNTIME_API)
+    runtime.run_loop()
