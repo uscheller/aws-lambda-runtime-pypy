@@ -1,21 +1,25 @@
-# test
-#from botocore.vendored import requests
+"""
+A Custom Runtime Interface for running Python code with Pypy on AWS Lambda
+"""
 import sys
 import json
 import requests
 import handler
 
+__author__ = "Ulrich Scheller"
+__email__ = "mail@ulrich-scheller.de"
+__website__ = "www.ulrich-scheller.de"
+__status__ = "Prototype"
+
 
 class RuntimeInterface(object):
     def __init__(self, AWS_LAMBDA_RUNTIME_API):
-        self.requestCount = 0
         path = "2018-06-01/runtime/invocation"
         self.fetch_url = "http://{}/{}/next".format(AWS_LAMBDA_RUNTIME_API, path)
         self.response_url = "http://{}/path/{}/response".format(AWS_LAMBDA_RUNTIME_API, path, "{}")
 
     def fetch_next_request(self):
         response = requests.get(self.fetch_url)
-        self.requestCount += 1
         return response.headers["Lambda-Runtime-Aws-Request-Id"], response
 
     def post_response(self, request_id, response):
@@ -25,9 +29,6 @@ class RuntimeInterface(object):
     def process_event(self):
         request_id, r = self.fetch_next_request()
         response = handler.hello(r.json(), None)
-        body = json.loads(response["body"])
-        body["debug"] = "requestCount: {}".format(self.requestCount)
-        response["body"] = json.dumps(body)
         self.post_response(request_id, response)
 
     def run_loop(self):
