@@ -1,16 +1,17 @@
+import os
 import unittest
-from requests import Response
+from unittest.mock import Mock
 from runtime_interface import RuntimeInterface
 
 
 class TestRuntimeInterface(RuntimeInterface):
-    def __init__(self, api):
-        super(TestRuntimeInterface, self).__init__(api)
+    def __init__(self):
+        super(TestRuntimeInterface, self).__init__()
         self.last_request_id = None
         self.last_response = None
 
     def fetch_next_request(self):
-        response = Response()
+        response = Mock()
         response.json = lambda: {}
         return "requestId", response
 
@@ -22,7 +23,9 @@ class TestRuntimeInterface(RuntimeInterface):
 class TestStringMethods(unittest.TestCase):
 
     def setUp(self):
-        self.runtime = TestRuntimeInterface("localhost:8080")
+        os.environ["AWS_LAMBDA_RUNTIME_API"] = "localhost:8080"
+        os.environ["_HANDLER"] = "handler.hello"
+        self.runtime = TestRuntimeInterface()
 
     def test_urls(self):
         self.assertEqual(self.runtime.fetch_url,
@@ -33,6 +36,12 @@ class TestStringMethods(unittest.TestCase):
             "http://localhost:8080/2018-06-01/runtime/invocation/{}/error")
 
     def test_process_event(self):
+        self.runtime.process_event()
+        self.assertEqual(self.runtime.last_request_id, "requestId")
+
+    def test_process_event_different_handler(self):
+        os.environ["_HANDLER"] = "handler.primes"
+        self.runtime = TestRuntimeInterface()
         self.runtime.process_event()
         self.assertEqual(self.runtime.last_request_id, "requestId")
 
