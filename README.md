@@ -9,7 +9,7 @@ This runtime is experimental and a Proof of Concept.
  * Uses a plain Pypy distribution downloaded from https://pypy.org/download.html
  * Deployed package is around 30 MB in size
  * Long running tasks benefit from using Pypy on Lambda
- * Short running, not CPU limited tasks are better of using the default Python runtime
+ * Short running, not CPU limited tasks are better off using the default Python runtime
  
 ## Usage
 
