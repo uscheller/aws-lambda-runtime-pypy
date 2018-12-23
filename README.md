@@ -13,6 +13,8 @@ This runtime is experimental and a Proof of Concept.
  
 ## Usage
 
+You should have your AWS tools and credentials set up and the [Serverless Framework](https://serverless.com/) installed.
+
 Run
 ```bash
 sls deploy
