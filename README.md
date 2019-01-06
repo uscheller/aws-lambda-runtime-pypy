@@ -7,10 +7,10 @@ This runtime is experimental and a Proof of Concept.
 ## Details
 
  * Uses a plain Pypy distribution downloaded from https://pypy.org/download.html
- * Deployed package is around 30 MB in size
+ * Deployed package is below 20 MB in size (manually removed unnecessary Python libraries)
  * Long running tasks benefit from using Pypy on Lambda
  * Short running, not CPU limited tasks are better off using the default Python runtime
- 
+
 ## Usage
 
 You should have your AWS tools and credentials set up and the [Serverless Framework](https://serverless.com/) installed.
