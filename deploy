@@ -1,2 +1,6 @@
 find . | grep -E "(__pycache__|\.pyc|\.pyo$)" | xargs rm -rf
+cd pypy3-*
+find . | grep -E "(README\.|LICENSE\.)" | xargs rm -rf
+find . -name "*.c" | xargs rm -rf
+cd ..
 sls deploy -f hello
